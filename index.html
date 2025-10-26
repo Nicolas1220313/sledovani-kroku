@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sledování kroků</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to right, #667eea, #764ba2);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .login-box {
+            background: white;
+            max-width: 400px;
+            margin: 100px auto;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+        .login-box h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .login-box input {
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        .login-box button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(to right, #8b5cf6, #ec4899);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .login-box button:hover {
+            opacity: 0.9;
+        }
+        .main-content {
+            display: none;
+            background: white;
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 30px;
+            border-radius: 20px;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .stat-box {
+            padding: 20px;
+            border-radius: 15px;
+            color: white;
+            text-align: center;
+        }
+        .stat-box.blue { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+        .stat-box.purple { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+        .stat-box.pink { background: linear-gradient(135deg, #ec4899, #db2777); }
+        .stat-box .number {
+            font-size: 32px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .stat-box .label {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        .input-box {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+        .input-box input {
+            width: 70%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        .input-box button {
+            padding: 12px 30px;
+            background: linear-gradient(to right, #8b5cf6, #ec4899);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .goal-box {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            padding: 25px;
+            border-radius: 15px;
+            border: 2px solid #fbbf24;
+        }
+        .goal-box h3 {
+            color: #78350f;
+            margin-bottom: 15px;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #ddd;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(to right, #fbbf24, #f59e0b, #dc2626);
+            transition: width 0.5s;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 10px;
+            color: white;
+            font-weight: bold;
+            font-size: 12px;
+        }
+        .list-box {
+            margin: 30px 0;
+        }
+        .list-item {
+            background: #f9fafb;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            border-left: 4px solid #8b5cf6;
+        }
+        .logout-btn {
+            background: #f3f4f6;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            color: #6b7280;
+        }
+        .logout-btn:hover {
+            background: #e5e7eb;
+        }
+    </style>
+</head>
+<body>
+    <div id="loginScreen" class="login-box">
+        <h1>🚶‍♂️ Sledování kroků</h1>
+        <p>Začni svou cestu k 1,000,000 kroků!</p>
+        <input type="text" id="userName" placeholder="Zadej své jméno">
+        <button onclick="prihlasit()">Začít</button>
+    </div>
+
+    <div id="mainScreen" class="main-content">
+        <div class="header">
+            <h1 id="pozdrav">Ahoj! 👋</h1>
+            <button class="logout-btn" onclick="odhlasit()">Odhlásit se</button>
+        </div>
+
+        <div class="stats">
+            <div class="stat-box blue">
+                <div>📅</div>
+                <div class="number" id="dnesniKroky">0</div>
+                <div class="label">Dnešní kroky</div>
+            </div>
+            <div class="stat-box purple">
+                <div>📈</div>
+                <div class="number" id="celkemKroky">0</div>
+                <div class="label">Celkem kroků</div>
+            </div>
+            <div class="stat-box pink">
+                <div>🎯</div>
+                <div class="number" id="procenta">0%</div>
+                <div class="label">Cíle dosaženo</div>
+            </div>
+        </div>
+
+        <div class="input-box">
+            <h3>🏆 Přidat dnešní kroky</h3>
+            <input type="number" id="krokyInput" placeholder="Počet kroků (max 10,000)" max="10000" min="0">
+            <button onclick="pridatKroky()">Přidat</button>
+        </div>
+
+        <div class="list-box">
+            <h3>📊 Tvoje kroky</h3>
+            <div id="seznamKroku"></div>
+        </div>
+
+        <div class="goal-box">
+            <h3>🎯 Cíl: 1,000,000 kroků</h3>
+            <div style="display: flex; justify-content: space-between; font-size: 14px; color: #78350f; margin-bottom: 10px;">
+                <span id="aktualniPokrok">0 kroků</span>
+                <span>1,000,000 kroků</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progresFill" style="width: 0%">
+                    <span id="progresText"></span>
+                </div>
+            </div>
+            <p style="color: #78350f;">Zbývá: <strong style="color: #ea580c;" id="zbyva">1,000,000</strong> kroků</p>
+        </div>
+    </div>
+
+    <script>
+        var CIL = 1000000;
+        var uzivatel = '';
+        var data = [];
+
+        function prihlasit() {
+            var jmeno = document.getElementById('userName').value;
+            if (jmeno) {
+                uzivatel = jmeno;
+                nacistData();
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('mainScreen').style.display = 'block';
+                document.getElementById('pozdrav').textContent = 'Ahoj, ' + jmeno + '! 👋';
+                aktualizovatVse();
+            }
+        }
+
+        function odhlasit() {
+            document.getElementById('loginScreen').style.display = 'block';
+            document.getElementById('mainScreen').style.display = 'none';
+            document.getElementById('userName').value = '';
+            uzivatel = '';
+        }
+
+        function nacistData() {
+            var ulozeno = localStorage.getItem('krokyData');
+            if (ulozeno) {
+                try {
+                    var parsed = JSON.parse(ulozeno);
+                    if (parsed.uzivatel === uzivatel) {
+                        data = parsed.data || [];
+                    }
+                } catch(e) {
+                    data = [];
+                }
+            }
+        }
+
+        function ulozitData() {
+            localStorage.setItem('krokyData', JSON.stringify({
+                uzivatel: uzivatel,
+                data: data
+            }));
+        }
+
+        function pridatKroky() {
+            var input = document.getElementById('krokyInput');
+            var kroky = parseInt(input.value);
+            
+            if (kroky > 0 && kroky <= 10000) {
+                var dnes = new Date().toISOString().split('T')[0];
+                var nalezeno = false;
+                
+                for (var i = 0; i < data.length; i++) {
+                    if (data[i].datum === dnes) {
+                        data[i].kroky = kroky;
+                        nalezeno = true;
+                        break;
+                    }
+                }
+                
+                if (!nalezeno) {
+                    data.push({ datum: dnes, kroky: kroky });
+                }
+                
+                data.sort(function(a, b) {
+                    return new Date(a.datum) - new Date(b.datum);
+                });
+                
+                ulozitData();
+                input.value = '';
+                aktualizovatVse();
+            } else {
+                alert('Zadej počet kroků mezi 1 a 10,000');
+            }
+        }
+
+        function celkoveKroky() {
+            var suma = 0;
+            for (var i = 0; i < data.length; i++) {
+                suma += data[i].kroky;
+            }
+            return suma;
+        }
+
+        function formatDatum(datum) {
+            var d = new Date(datum);
+            return d.getDate() + '.' + (d.getMonth() + 1) + '.' + d.getFullYear();
+        }
+
+        function aktualizovatVse() {
+            var celkem = celkoveKroky();
+            var procent = (celkem / CIL * 100).toFixed(1);
+            
+            document.getElementById('dnesniKroky').textContent = data.length > 0 ? data[data.length - 1].kroky.toLocaleString('cs-CZ') : '0';
+            document.getElementById('celkemKroky').textContent = celkem.toLocaleString('cs-CZ');
+            document.getElementById('procenta').textContent = procent + '%';
+            document.getElementById('aktualniPokrok').textContent = celkem.toLocaleString('cs-CZ') + ' kroků';
+            document.getElementById('zbyva').textContent = (CIL - celkem).toLocaleString('cs-CZ');
+            
+            var sirka = Math.min(procent, 100);
+            document.getElementById('progresFill').style.width = sirka + '%';
+            document.getElementById('progresText').textContent = procent > 5 ? procent + '%' : '';
+            
+            var seznam = document.getElementById('seznamKroku');
+            seznam.innerHTML = '';
+            
+            if (data.length === 0) {
+                seznam.innerHTML = '<p style="text-align: center; color: #6b7280; padding: 20px;">Zatím nemáš žádná data. Přidej své první kroky! 🚶‍♂️</p>';
+            } else {
+                for (var i = data.length - 1; i >= 0 && i >= data.length - 10; i--) {
+                    var item = document.createElement('div');
+                    item.className = 'list-item';
+                    item.innerHTML = '<span>' + formatDatum(data[i].datum) + '</span><strong>' + data[i].kroky.toLocaleString('cs-CZ') + ' kroků</strong>';
+                    seznam.appendChild(item);
+                }
+            }
+        }
+
+        document.getElementById('userName').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') prihlasit();
+        });
+
+        document.getElementById('krokyInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') pridatKroky();
+        });
+    </script>
+</body>
+</html>
